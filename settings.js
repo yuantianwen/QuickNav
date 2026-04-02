@@ -76,7 +76,7 @@ class Settings {
   }
 
   async update(settings) {
-    this._shortcutKeys = settings.shortcutKeys.sort(Settings.shortcutKeyCompare);
+    this._shortcutKeys = settings.shortcutKeys;
     this._listColumnCount = settings.listColumnCount;
     this._filterOnPopup = settings.filterOnPopup;
     this._synced = settings.synced;
@@ -119,7 +119,7 @@ class Settings {
     } else if (loaded[SHORTCUT_KEYS_STORED_NAMES[0]]) {
       shortcutKeys = this._mergeStoredShortcutKeys(loaded);
     }
-    this._shortcutKeys = shortcutKeys.sort(Settings.shortcutKeyCompare);
+    this._shortcutKeys = shortcutKeys;
 
     this._listColumnCount = loaded.settings?.listColumnCount || DEFAULT_LIST_COLUMN_COUNT;
     this._filterOnPopup = loaded.settings?.filterOnPopup || false;

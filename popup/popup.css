@@ -39,6 +39,46 @@ body {
   color: #e0e0e0;
 }
 
+#shortcutKeys details.group {
+  margin: 2px 0;
+}
+
+#shortcutKeys summary.group-summary {
+  cursor: pointer;
+  list-style: none;
+  color: #6ec9ff;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+#shortcutKeys summary.group-summary::-webkit-details-marker {
+  display: none;
+}
+
+#shortcutKeys summary.group-summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 14px;
+  color: #8fcfff;
+}
+
+#shortcutKeys details.group[open] > summary.group-summary::before {
+  content: '▾';
+}
+
+#shortcutKeys summary.group-summary:hover {
+  background-color: #2d2d2d;
+}
+
+#shortcutKeys .group-content {
+  margin-left: 4px;
+}
+
+#shortcutKeys .group-content div.item {
+  break-inside: avoid;
+}
+
 #menu {
   white-space: nowrap;
   margin: 10px 5px;
@@ -54,4 +94,11 @@ body {
 
 #menu a:hover {
   text-decoration: underline;
+}
+
+#menu .shortcut-hint {
+  font-size: 10px;
+  color: #555;
+  margin: 0 3px;
+  vertical-align: middle;
 }

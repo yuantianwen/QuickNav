@@ -21,11 +21,14 @@ class ShortcutKey {
 
     this.$openDetailButton = $target.find('button.open-detail');
     this.$closeDetailButton = $target.find('button.close-detail');
+    this.$moveUpButton = $target.find('button.move-up');
+    this.$moveDownButton = $target.find('button.move-down');
     this.$removeButton = $target.find('button.remove');
 
     this.$inputKey = $target.find('input[name="key"]');
     this.$inputHideOnPopup = $target.find('input[name="hideOnPopup"]');
     this.$inputAction = $target.find('select[name="action"]');
+    this.$inputGroup = $target.find('input[name="group"]');
     this.$inputTitle = $target.find('input[name="title"]');
     this.$inputUrl = $target.find('input[name="url"]');
     this.$inputScript = $target.find('select[name="script"]');
@@ -56,11 +59,14 @@ class ShortcutKey {
     this.$summary.on('click', this._toggleDetail.bind(this));
     this.$openDetailButton.on('click', this.openDetail.bind(this));
     this.$closeDetailButton.on('click', this.closeDetail.bind(this));
+    this.$moveUpButton.on('click', this._moveUp.bind(this));
+    this.$moveDownButton.on('click', this._moveDown.bind(this));
     this.$removeButton.on('click', this._remove.bind(this));
 
     this.$inputAction.on('change', this._switchInputContent.bind(this));
     this.$inputKey.on('keyup', this._applySummary.bind(this));
     this.$inputTitle.on('keyup', this._applySummary.bind(this));
+    this.$inputGroup.on('keyup', this._applySummary.bind(this));
 
     this.$inputKey.on('keydown', this._keydownInputKey.bind(this));
     this.$inputKey.on('keypress', this._keypressInputKey.bind(this));
@@ -71,6 +77,7 @@ class ShortcutKey {
     this.$inputKey.val(data.key);
     this.$inputHideOnPopup.prop('checked', data.hideOnPopup || false);
     this.$inputAction.val(data.action);
+    this.$inputGroup.val(data.group || '');
     this.$inputTitle.val(data.title);
 
     switch (data.action) {
@@ -162,7 +169,12 @@ class ShortcutKey {
   }
 
   _applySummary() {
-    this.$summary.empty()
+    this.$summary.empty();
+    const group = this.$inputGroup.val().trim();
+    if (group) {
+      this.$summary.append($('<span>').addClass('group-badge').text(group));
+    }
+    this.$summary
       .append($('<span>').addClass('key').text(this.$inputKey.val()))
       .append($('<span>').addClass('title').text(this.$inputTitle.val()));
   }
@@ -170,6 +182,25 @@ class ShortcutKey {
   _remove() {
     this.$target.trigger('remove', this);
     this.$target.remove();
+  }
+
+  _moveUp() {
+    this.$target.trigger('move', {
+      shortcutKey: this,
+      direction: -1
+    });
+  }
+
+  _moveDown() {
+    this.$target.trigger('move', {
+      shortcutKey: this,
+      direction: 1
+    });
+  }
+
+  setMoveButtonState(canMoveUp, canMoveDown) {
+    this.$moveUpButton.prop('disabled', !canMoveUp);
+    this.$moveDownButton.prop('disabled', !canMoveDown);
   }
 
   _validateNotEmpty($input) {
@@ -275,6 +306,10 @@ class ShortcutKey {
       action: parseInt(this.$inputAction.val(), 10),
       title: this.$inputTitle.val(),
     };
+    const group = this.$inputGroup.val().trim();
+    if (group) {
+      data.group = group;
+    }
 
     switch (data.action) {
       case ActionId.JUMP_URL:
@@ -315,7 +350,37 @@ class ShortcutKeys {
     const index = this._shortcutKeys.indexOf(shortcutKey);
     if (index != -1) {
       this._shortcutKeys.splice(index, 1);
+      this._updateMoveButtonState();
     }
+  }
+
+  _moveShortcutKey(event, payload) {
+    const currentIndex = this._shortcutKeys.indexOf(payload.shortcutKey);
+    if (currentIndex == -1) {
+      return;
+    }
+
+    const targetIndex = currentIndex + payload.direction;
+    if (targetIndex < 0 || targetIndex >= this._shortcutKeys.length) {
+      return;
+    }
+
+    const swapTarget = this._shortcutKeys[targetIndex];
+    if (payload.direction < 0) {
+      payload.shortcutKey.$target.insertBefore(swapTarget.$target);
+    } else {
+      payload.shortcutKey.$target.insertAfter(swapTarget.$target);
+    }
+
+    this._shortcutKeys[currentIndex] = swapTarget;
+    this._shortcutKeys[targetIndex] = payload.shortcutKey;
+    this._updateMoveButtonState();
+  }
+
+  _updateMoveButtonState() {
+    this._shortcutKeys.forEach((shortcutKey, index) => {
+      shortcutKey.setMoveButtonState(index > 0, index < this._shortcutKeys.length - 1);
+    });
   }
 
   append(data, isOpened) {
@@ -323,11 +388,13 @@ class ShortcutKeys {
     const shortcutKey = new ShortcutKey($child, data);
 
     $child.on('remove', this._removeShortcutKey.bind(this));
+    $child.on('move', this._moveShortcutKey.bind(this));
 
     isOpened ? shortcutKey.openDetail() : shortcutKey.closeDetail();
 
     this._shortcutKeys.push(shortcutKey);
     this.$target.append($child.show());
+    this._updateMoveButtonState();
 
     $child[0].scrollIntoView();
   }

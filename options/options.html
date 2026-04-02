@@ -135,6 +135,12 @@
           <a class="summary" role="button">New shortcut key</a>
           <span class="glyphicon glyphicon-exclamation-sign alert-icon" aria-hidden="true" style="display: none"></span>
           <div class="pull-right">
+            <button type="button" class="btn btn-xs btn-default move-up" aria-label="Move up" title="Move up">
+              <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-xs btn-default move-down" aria-label="Move down" title="Move down">
+              <span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
+            </button>
             <button type="button" class="btn btn-xs btn-default remove" aria-label="Remove">
               <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
             </button>
@@ -171,6 +177,12 @@
                 <option value="current">current</option>
                 <option value="new">new</option>
               </select>
+            </div>
+          </div>
+          <div class="form-group form-group-sm">
+            <label class="col-sm-2 control-label">Group</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="group" placeholder="e.g. Redis, Work, AI …">
             </div>
           </div>
           <div class="form-group form-group-sm">
